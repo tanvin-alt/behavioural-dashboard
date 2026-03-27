@@ -1,0 +1,743 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Behavioural Dashboard â Designing for the 100th Use</title>
+  <meta name="description" content="An interactive demo showing how a dashboard adapts to your usage patterns over time." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:       #FAFAF8;
+      --surface:  #F2F1ED;
+      --surface2: #E8E7E2;
+      --border:   rgba(0,0,0,0.08);
+      --border-m: rgba(0,0,0,0.14);
+      --border-s: rgba(0,0,0,0.20);
+      --text-p:   #181816;
+      --text-s:   #5A5956;
+      --text-t:   #8C8A85;
+      --teal:     #1D9E75;
+      --teal-l:   #E1F5EE;
+      --teal-d:   #085041;
+      --teal-m:   #5DCAA5;
+      --teal-ll:  #9FE1CB;
+      --coral:    #D85A30;
+      --coral-l:  #FAECE7;
+      --coral-d:  #712B13;
+      --amber:    #EF9F27;
+      --amber-l:  #FAEEDA;
+      --amber-d:  #633806;
+      --gray-m:   #B4B2A9;
+      --gray-d:   #888780;
+      --radius:   12px;
+      --radius-sm:8px;
+    }
+
+    html { font-size: 16px; }
+
+    body {
+      font-family: 'DM Sans', system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text-p);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 48px 24px 80px;
+    }
+
+    /* ââ Page header ââ */
+    .page-header {
+      width: 100%;
+      max-width: 720px;
+      margin-bottom: 48px;
+      text-align: center;
+    }
+    .eyebrow {
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--teal);
+      margin-bottom: 14px;
+    }
+    h1 {
+      font-size: clamp(26px, 5vw, 40px);
+      font-weight: 300;
+      line-height: 1.15;
+      color: var(--text-p);
+      letter-spacing: -0.02em;
+      margin-bottom: 16px;
+    }
+    h1 em {
+      font-style: italic;
+      font-weight: 300;
+      color: var(--teal);
+    }
+    .lede {
+      font-size: 15px;
+      line-height: 1.7;
+      color: var(--text-s);
+      max-width: 560px;
+      margin: 0 auto 24px;
+    }
+    .instruction-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--surface);
+      border: 0.5px solid var(--border-m);
+      border-radius: 20px;
+      padding: 8px 16px;
+      font-size: 12px;
+      color: var(--text-s);
+    }
+    .pill-dot {
+      width: 6px; height: 6px; border-radius: 50%;
+      background: var(--teal);
+      animation: blink 2s ease-in-out infinite;
+    }
+    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+    /* ââ Dashboard container ââ */
+    .db-wrap {
+      width: 100%;
+      max-width: 780px;
+    }
+
+    /* ââ Chrome bar ââ */
+    .chrome {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+    }
+    .status-txt {
+      font-size: 12px;
+      color: var(--text-s);
+      font-family: 'DM Mono', monospace;
+      transition: opacity 0.3s;
+    }
+    .reset-btn {
+      font-size: 11px;
+      font-family: 'DM Sans', sans-serif;
+      color: var(--text-t);
+      background: none;
+      border: 0.5px solid var(--border-m);
+      border-radius: 8px;
+      padding: 5px 14px;
+      cursor: pointer;
+      transition: background 0.2s, border-color 0.2s, color 0.2s;
+    }
+    .reset-btn:hover {
+      background: var(--surface);
+      border-color: var(--border-s);
+      color: var(--text-s);
+    }
+
+    /* ââ Shell ââ */
+    .shell {
+      border: 0.5px solid var(--border-s);
+      border-radius: 16px;
+      overflow: hidden;
+      background: #fff;
+    }
+    .topbar {
+      background: var(--surface);
+      border-bottom: 0.5px solid var(--border);
+      padding: 11px 18px;
+      display: flex;
+      align-items: center;
+      gap: 7px;
+    }
+    .tdot {
+      width: 9px; height: 9px; border-radius: 50%;
+      background: var(--border-s);
+    }
+    .ttl {
+      font-size: 11px;
+      color: var(--text-t);
+      font-weight: 500;
+      margin-left: 4px;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+
+    /* ââ Bento grid ââ */
+    .bento {
+      padding: 14px;
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 10px;
+      transition:
+        grid-template-columns 0.6s cubic-bezier(0.4,0,0.2,1),
+        grid-template-rows    0.6s cubic-bezier(0.4,0,0.2,1);
+    }
+
+    /* ââ Widget ââ */
+    .w {
+      border-radius: 12px;
+      border: 0.5px solid var(--border);
+      background: var(--surface);
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+      transition:
+        border-color 0.4s ease,
+        background   0.4s ease,
+        min-height   0.55s cubic-bezier(0.4,0,0.2,1),
+        transform    0.12s ease;
+      display: flex;
+      flex-direction: column;
+      min-height: 82px;
+    }
+    .w:hover { border-color: var(--border-m); }
+    .w:active { transform: scale(0.987); }
+
+    .w-accent {
+      position: absolute; left: 0; top: 0; bottom: 0;
+      width: 0;
+      background: var(--teal);
+      border-radius: 12px 0 0 12px;
+      transition: width 0.4s ease;
+    }
+
+    .w-inner {
+      padding: 13px 15px 14px;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .w-label {
+      font-size: 10px;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--text-t);
+      margin-bottom: 6px;
+      transition: color 0.35s;
+    }
+    .w-value {
+      font-size: 20px;
+      font-weight: 500;
+      color: var(--text-p);
+      line-height: 1.05;
+      transition: font-size 0.5s cubic-bezier(0.4,0,0.2,1);
+    }
+
+    /* Reveal layers */
+    .reveal {
+      overflow: hidden;
+      transition: max-height 0.5s cubic-bezier(0.4,0,0.2,1), opacity 0.4s ease;
+      max-height: 0;
+      opacity: 0;
+    }
+    .reveal.on { opacity: 1; }
+
+    .w-sub {
+      font-size: 11px;
+      color: var(--text-t);
+      margin-top: 5px;
+      line-height: 1.5;
+    }
+    .w-bar-wrap { margin-top: 9px; }
+    .w-bar-track {
+      height: 3px; border-radius: 2px;
+      background: var(--border-m);
+    }
+    .w-bar-fill { height: 100%; border-radius: 2px; transition: width 0.5s ease; }
+
+    .w-sparks {
+      display: flex; align-items: flex-end;
+      gap: 3px; height: 28px; margin-top: 9px;
+    }
+    .w-spark { flex: 1; border-radius: 2px 2px 0 0; }
+
+    .w-trend {
+      display: flex; align-items: center;
+      gap: 5px; margin-top: 7px;
+      font-size: 11px; color: var(--text-t);
+    }
+    .up { color: var(--teal); }
+    .dn { color: var(--coral); }
+
+    .w-divider {
+      height: 0.5px;
+      background: var(--border);
+      margin: 10px 0;
+    }
+    .w-detail-row {
+      display: flex; justify-content: space-between;
+      align-items: baseline; margin-top: 5px;
+    }
+    .w-dl { font-size: 10px; color: var(--text-t); }
+    .w-dv { font-size: 11px; font-weight: 500; color: var(--text-s); }
+
+    .w-tag {
+      display: inline-block;
+      font-size: 10px; font-weight: 500;
+      padding: 3px 9px; border-radius: 10px;
+      margin-top: 10px;
+    }
+    .tg-teal  { background: var(--teal-l);  color: var(--teal-d); }
+    .tg-coral { background: var(--coral-l); color: var(--coral-d); }
+    .tg-amber { background: var(--amber-l); color: var(--amber-d); }
+
+    /* Pulse ring on click */
+    .pulse-ring {
+      position: absolute; inset: 0;
+      border-radius: 12px;
+      border: 2px solid var(--teal);
+      opacity: 0; pointer-events: none;
+    }
+    @media (prefers-reduced-motion: no-preference) {
+      .pulse { animation: pulse-anim 0.45s ease-out forwards; }
+      @keyframes pulse-anim {
+        0%   { opacity: 0.55; transform: scale(1); }
+        100% { opacity: 0;    transform: scale(1.03); }
+      }
+    }
+
+    /* ââ Hint ââ */
+    .hint {
+      font-size: 12px;
+      color: var(--text-t);
+      text-align: center;
+      padding: 14px 0 0;
+      font-style: italic;
+      min-height: 20px;
+      transition: opacity 0.4s;
+      line-height: 1.6;
+    }
+
+    /* ââ Footer ââ */
+    .page-footer {
+      margin-top: 64px;
+      text-align: center;
+      font-size: 12px;
+      color: var(--text-t);
+      line-height: 1.8;
+    }
+    .page-footer a {
+      color: var(--teal);
+      text-decoration: none;
+    }
+    .page-footer a:hover { text-decoration: underline; }
+
+    /* ââ Responsive ââ */
+    @media (max-width: 560px) {
+      body { padding: 32px 16px 60px; }
+      .bento { grid-template-columns: 1fr 1fr !important; gap: 8px; padding: 10px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Page header -->
+  <header class="page-header">
+    <div class="eyebrow">Interactive demo</div>
+    <h1>Designing for the <em>100th</em> use</h1>
+    <p class="lede">
+      Most enterprise dashboards are designed for the first session â
+      then frozen in place. This demo shows what happens when an interface
+      learns from how you actually work.
+    </p>
+    <div class="instruction-pill">
+      <div class="pill-dot"></div>
+      Click any widget repeatedly to see the dashboard adapt
+    </div>
+  </header>
+
+  <!-- Dashboard -->
+  <div class="db-wrap">
+
+    <div class="chrome">
+      <span class="status-txt" id="stxt">Waiting for your first interaction</span>
+      <button class="reset-btn" onclick="doReset()">Reset</button>
+    </div>
+
+    <div class="shell">
+      <div class="topbar">
+        <div class="tdot"></div><div class="tdot"></div><div class="tdot"></div>
+        <span class="ttl">Operations dashboard</span>
+      </div>
+      <div class="bento" id="bento">
+
+        <!-- orders -->
+        <div class="w" id="w-orders" onclick="hit('orders')">
+          <div class="pulse-ring" id="pr-orders"></div>
+          <div class="w-accent" id="ac-orders"></div>
+          <div class="w-inner">
+            <div class="w-label">Active orders</div>
+            <div class="w-value" id="v-orders">1,284</div>
+            <div class="reveal" id="r1-orders">
+              <div class="w-sub">â 12% from yesterday</div>
+            </div>
+            <div class="reveal" id="r2-orders">
+              <div class="w-sparks">
+                <div class="w-spark" style="height:55%;background:var(--teal-ll)"></div>
+                <div class="w-spark" style="height:72%;background:var(--teal-m)"></div>
+                <div class="w-spark" style="height:44%;background:var(--teal-ll)"></div>
+                <div class="w-spark" style="height:90%;background:var(--teal)"></div>
+                <div class="w-spark" style="height:62%;background:var(--teal-m)"></div>
+                <div class="w-spark" style="height:78%;background:var(--teal)"></div>
+              </div>
+              <div class="w-trend"><span class="up">â</span> Peak: 1,340 at 11am</div>
+            </div>
+            <div class="reveal" id="r3-orders">
+              <div class="w-divider"></div>
+              <div class="w-detail-row"><span class="w-dl">Completed today</span><span class="w-dv">986</span></div>
+              <div class="w-detail-row"><span class="w-dl">Cancelled</span><span class="w-dv">23</span></div>
+              <div class="w-detail-row"><span class="w-dl">Avg basket</span><span class="w-dv">â¹430</span></div>
+              <div class="w-tag tg-teal">High frequency</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- delayed -->
+        <div class="w" id="w-delayed" onclick="hit('delayed')">
+          <div class="pulse-ring" id="pr-delayed"></div>
+          <div class="w-accent" id="ac-delayed"></div>
+          <div class="w-inner">
+            <div class="w-label">Delayed</div>
+            <div class="w-value" id="v-delayed" style="color:var(--coral)">37</div>
+            <div class="reveal" id="r1-delayed">
+              <div class="w-sub">Up 4 from yesterday</div>
+            </div>
+            <div class="reveal" id="r2-delayed">
+              <div class="w-bar-wrap">
+                <div class="w-bar-track"><div class="w-bar-fill" style="width:31%;background:var(--coral)"></div></div>
+              </div>
+              <div class="w-sub" style="margin-top:5px">31% of active orders affected</div>
+            </div>
+            <div class="reveal" id="r3-delayed">
+              <div class="w-divider"></div>
+              <div class="w-detail-row"><span class="w-dl">Zone A</span><span class="w-dv" style="color:var(--coral)">14 delayed</span></div>
+              <div class="w-detail-row"><span class="w-dl">Zone B</span><span class="w-dv">9 delayed</span></div>
+              <div class="w-detail-row"><span class="w-dl">Avg delay</span><span class="w-dv">18 min</span></div>
+              <div class="w-tag tg-coral">Critical</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- routes -->
+        <div class="w" id="w-routes" onclick="hit('routes')">
+          <div class="pulse-ring" id="pr-routes"></div>
+          <div class="w-accent" id="ac-routes"></div>
+          <div class="w-inner">
+            <div class="w-label">Route planning</div>
+            <div class="w-value" id="v-routes">14 active</div>
+            <div class="reveal" id="r1-routes">
+              <div class="w-bar-wrap">
+                <div class="w-bar-track"><div class="w-bar-fill" style="width:68%;background:var(--teal)"></div></div>
+              </div>
+              <div class="w-sub" style="margin-top:5px">3 routes flagged</div>
+            </div>
+            <div class="reveal" id="r2-routes">
+              <div class="w-trend"><span class="dn">â</span> Route 7 running 22 min late</div>
+            </div>
+            <div class="reveal" id="r3-routes">
+              <div class="w-divider"></div>
+              <div class="w-detail-row"><span class="w-dl">Optimised today</span><span class="w-dv">8 routes</span></div>
+              <div class="w-detail-row"><span class="w-dl">Avg route time</span><span class="w-dv">42 min</span></div>
+              <div class="w-detail-row"><span class="w-dl">Distance saved</span><span class="w-dv">124 km</span></div>
+              <div class="w-tag tg-teal">Primary workspace</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- reassign -->
+        <div class="w" id="w-reassign" onclick="hit('reassign')">
+          <div class="pulse-ring" id="pr-reassign"></div>
+          <div class="w-accent" id="ac-reassign"></div>
+          <div class="w-inner">
+            <div class="w-label">Rider reassign</div>
+            <div class="w-value" id="v-reassign">12</div>
+            <div class="reveal" id="r1-reassign">
+              <div class="w-sub">5 reassigned this hour</div>
+            </div>
+            <div class="reveal" id="r2-reassign">
+              <div class="w-bar-wrap">
+                <div class="w-bar-track"><div class="w-bar-fill" style="width:42%;background:var(--amber)"></div></div>
+              </div>
+              <div class="w-sub" style="margin-top:5px">42% queue cleared</div>
+            </div>
+            <div class="reveal" id="r3-reassign">
+              <div class="w-divider"></div>
+              <div class="w-detail-row"><span class="w-dl">Avg wait</span><span class="w-dv">8 min</span></div>
+              <div class="w-detail-row"><span class="w-dl">Top reason</span><span class="w-dv">Breakdown</span></div>
+              <div class="w-tag tg-amber">Needs action</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- fleet -->
+        <div class="w" id="w-fleet" onclick="hit('fleet')">
+          <div class="pulse-ring" id="pr-fleet"></div>
+          <div class="w-accent" id="ac-fleet"></div>
+          <div class="w-inner">
+            <div class="w-label">Fleet utilisation</div>
+            <div class="w-value" id="v-fleet">72%</div>
+            <div class="reveal" id="r1-fleet">
+              <div class="w-bar-wrap">
+                <div class="w-bar-track"><div class="w-bar-fill" style="width:72%;background:var(--teal-m)"></div></div>
+              </div>
+              <div class="w-sub" style="margin-top:5px">43 of 60 active</div>
+            </div>
+            <div class="reveal" id="r2-fleet">
+              <div class="w-trend"><span class="up">â</span> 4 riders returning at 3pm</div>
+            </div>
+            <div class="reveal" id="r3-fleet">
+              <div class="w-divider"></div>
+              <div class="w-detail-row"><span class="w-dl">In maintenance</span><span class="w-dv">11</span></div>
+              <div class="w-detail-row"><span class="w-dl">Off-shift</span><span class="w-dv">6</span></div>
+              <div class="w-detail-row"><span class="w-dl">Avg trips / rider</span><span class="w-dv">7.2</span></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ontime -->
+        <div class="w" id="w-ontime" onclick="hit('ontime')">
+          <div class="pulse-ring" id="pr-ontime"></div>
+          <div class="w-accent" id="ac-ontime"></div>
+          <div class="w-inner">
+            <div class="w-label">On-time rate</div>
+            <div class="w-value" id="v-ontime">94%</div>
+            <div class="reveal" id="r1-ontime">
+              <div class="w-sub">+2% vs last week</div>
+            </div>
+            <div class="reveal" id="r2-ontime">
+              <div class="w-sparks">
+                <div class="w-spark" style="height:80%;background:var(--teal-ll)"></div>
+                <div class="w-spark" style="height:85%;background:var(--teal-m)"></div>
+                <div class="w-spark" style="height:78%;background:var(--teal-ll)"></div>
+                <div class="w-spark" style="height:92%;background:var(--teal)"></div>
+                <div class="w-spark" style="height:94%;background:var(--teal)"></div>
+                <div class="w-spark" style="height:94%;background:var(--teal)"></div>
+              </div>
+            </div>
+            <div class="reveal" id="r3-ontime">
+              <div class="w-divider"></div>
+              <div class="w-detail-row"><span class="w-dl">SLA target</span><span class="w-dv">90%</span></div>
+              <div class="w-detail-row"><span class="w-dl">Best zone</span><span class="w-dv">Zone C Â· 98%</span></div>
+              <div class="w-tag tg-teal">Above target</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- delivery -->
+        <div class="w" id="w-delivery" onclick="hit('delivery')">
+          <div class="pulse-ring" id="pr-delivery"></div>
+          <div class="w-accent" id="ac-delivery"></div>
+          <div class="w-inner">
+            <div class="w-label">Avg delivery</div>
+            <div class="w-value" id="v-delivery">28 min</div>
+            <div class="reveal" id="r1-delivery">
+              <div class="w-sub">SLA target: 35 min</div>
+            </div>
+            <div class="reveal" id="r2-delivery">
+              <div class="w-bar-wrap">
+                <div class="w-bar-track"><div class="w-bar-fill" style="width:80%;background:var(--teal-m)"></div></div>
+              </div>
+              <div class="w-sub" style="margin-top:5px">7 min under SLA</div>
+            </div>
+            <div class="reveal" id="r3-delivery">
+              <div class="w-divider"></div>
+              <div class="w-detail-row"><span class="w-dl">Fastest today</span><span class="w-dv">11 min</span></div>
+              <div class="w-detail-row"><span class="w-dl">Slowest today</span><span class="w-dv">58 min</span></div>
+              <div class="w-tag tg-teal">On track</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- cost -->
+        <div class="w" id="w-cost" onclick="hit('cost')">
+          <div class="pulse-ring" id="pr-cost"></div>
+          <div class="w-accent" id="ac-cost"></div>
+          <div class="w-inner">
+            <div class="w-label">Cost / order</div>
+            <div class="w-value" id="v-cost">â¹1,082</div>
+            <div class="reveal" id="r1-cost">
+              <div class="w-sub">Budget: â¹1,200</div>
+            </div>
+            <div class="reveal" id="r2-cost">
+              <div class="w-bar-wrap">
+                <div class="w-bar-track"><div class="w-bar-fill" style="width:90%;background:var(--amber)"></div></div>
+              </div>
+              <div class="w-sub" style="margin-top:5px">90% of budget used</div>
+            </div>
+            <div class="reveal" id="r3-cost">
+              <div class="w-divider"></div>
+              <div class="w-detail-row"><span class="w-dl">Fuel</span><span class="w-dv">â¹340</span></div>
+              <div class="w-detail-row"><span class="w-dl">Labour</span><span class="w-dv">â¹620</span></div>
+              <div class="w-detail-row"><span class="w-dl">Overhead</span><span class="w-dv">â¹122</span></div>
+              <div class="w-tag tg-amber">Monitor closely</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- reconcile -->
+        <div class="w" id="w-reconcile" onclick="hit('reconcile')">
+          <div class="pulse-ring" id="pr-reconcile"></div>
+          <div class="w-accent" id="ac-reconcile"></div>
+          <div class="w-inner">
+            <div class="w-label">Cost reconciliation</div>
+            <div class="w-value" id="v-reconcile">â¹48.2K</div>
+            <div class="reveal" id="r1-reconcile">
+              <div class="w-sub">End-of-day report due</div>
+            </div>
+            <div class="reveal" id="r2-reconcile">
+              <div class="w-sparks">
+                <div class="w-spark" style="height:40%;background:var(--surface2)"></div>
+                <div class="w-spark" style="height:60%;background:var(--gray-m)"></div>
+                <div class="w-spark" style="height:33%;background:var(--surface2)"></div>
+                <div class="w-spark" style="height:75%;background:var(--gray-d)"></div>
+                <div class="w-spark" style="height:50%;background:var(--gray-m)"></div>
+                <div class="w-spark" style="height:44%;background:var(--surface2)"></div>
+              </div>
+              <div class="w-trend">7-day spend trend</div>
+            </div>
+            <div class="reveal" id="r3-reconcile">
+              <div class="w-divider"></div>
+              <div class="w-detail-row"><span class="w-dl">Invoiced</span><span class="w-dv">â¹41.8K</span></div>
+              <div class="w-detail-row"><span class="w-dl">Pending</span><span class="w-dv">â¹6.4K</span></div>
+              <div class="w-detail-row"><span class="w-dl">Variance</span><span class="w-dv" style="color:var(--coral)">+â¹1.2K</span></div>
+            </div>
+          </div>
+        </div>
+
+      </div><!-- /bento -->
+    </div><!-- /shell -->
+
+    <div class="hint" id="hint">All widgets start equal. Your clicks determine what the interface surfaces.</div>
+
+  </div><!-- /db-wrap -->
+
+  <!-- Footer -->
+  <footer class="page-footer">
+    <p>A demo for <em>Designing for the 100th Use</em></p>
+    <p style="margin-top:6px">Click any widget repeatedly Â· Unused tiles shrink Â· Active tiles grow and reveal more detail</p>
+  </footer>
+
+  <script>
+    const IDS = ['orders','delayed','routes','reassign','fleet','ontime','delivery','cost','reconcile'];
+    const COL1 = ['orders','reassign','delivery'];
+    const COL2 = ['delayed','fleet','cost'];
+    const COL3 = ['routes','ontime','reconcile'];
+    const ROW1 = ['orders','delayed','routes'];
+    const ROW2 = ['reassign','fleet','ontime'];
+    const ROW3 = ['delivery','cost','reconcile'];
+
+    const scores = {};
+    IDS.forEach(id => scores[id] = 1);
+
+    const GAIN = 0.95, DECAY = 0.09, DECAY_MS = 3200, MAX = 6, MIN = 0.25;
+    let clicks = 0;
+
+    function hit(id) {
+      scores[id] = Math.min(MAX, scores[id] + GAIN);
+      clicks++;
+      const pr = document.getElementById('pr-' + id);
+      pr.classList.remove('pulse');
+      void pr.offsetWidth;
+      pr.classList.add('pulse');
+      setTimeout(() => pr.classList.remove('pulse'), 450);
+      render();
+      updateStatus(id);
+    }
+
+    function decay() {
+      IDS.forEach(id => scores[id] = Math.max(MIN, scores[id] - DECAY));
+      render();
+    }
+
+    function doReset() {
+      IDS.forEach(id => scores[id] = 1);
+      clicks = 0;
+      render();
+      document.getElementById('stxt').textContent = 'Waiting for your first interaction';
+      document.getElementById('hint').textContent = 'All widgets start equal. Your clicks determine what the interface surfaces.';
+    }
+
+    function maxOf(arr) { return Math.max(...arr.map(id => scores[id])); }
+
+    function render() {
+      const allS = IDS.map(id => scores[id]);
+      const minS = Math.min(...allS), maxS = Math.max(...allS);
+      const rng = maxS - minS || 1;
+
+      const c1 = maxOf(COL1), c2 = maxOf(COL2), c3 = maxOf(COL3);
+      const r1 = maxOf(ROW1), r2 = maxOf(ROW2), r3 = maxOf(ROW3);
+      const cT = c1+c2+c3, rT = r1+r2+r3;
+      const BASE = 1, SPAN = 0.55;
+
+      const cf = v => (BASE + (v/cT) * SPAN * 3).toFixed(4);
+      const rf = v => (BASE + (v/rT) * SPAN * 3).toFixed(4);
+
+      document.getElementById('bento').style.gridTemplateColumns = `${cf(c1)}fr ${cf(c2)}fr ${cf(c3)}fr`;
+      document.getElementById('bento').style.gridTemplateRows    = `${rf(r1)}fr ${rf(r2)}fr ${rf(r3)}fr`;
+
+      IDS.forEach(id => {
+        const s = scores[id];
+        const n = (s - minS) / rng;
+        const w   = document.getElementById('w-' + id);
+        const ac  = document.getElementById('ac-' + id);
+        const vEl = document.getElementById('v-' + id);
+        const lbl = w.querySelector('.w-label');
+
+        const isHi  = s >= 2.8;
+        const isMid = s >= 1.8;
+        const isLo  = s < 0.9;
+
+        w.style.background   = isHi ? '#fff' : 'var(--surface)';
+        w.style.borderColor  = isHi ? 'rgba(29,158,117,0.35)' : isMid ? 'var(--border-m)' : 'var(--border)';
+        ac.style.width       = isHi ? '3px' : '0';
+
+        if (vEl) vEl.style.fontSize = Math.round(14 + n * 26) + 'px';
+        if (lbl) lbl.style.color = isHi ? 'var(--text-s)' : 'var(--text-t)';
+
+        w.style.minHeight = isLo ? '66px' : isHi ? '120px' : '82px';
+
+        const show = (lvl, cond) => {
+          const el = document.getElementById('r' + lvl + '-' + id);
+          if (!el) return;
+          el.style.maxHeight = cond ? '220px' : '0';
+          el.style.opacity   = cond ? '1' : '0';
+          el.classList.toggle('on', cond);
+        };
+        show(1, isMid);
+        show(2, isHi);
+        show(3, s >= 4.2);
+      });
+    }
+
+    function updateStatus(id) {
+      const labels = {
+        orders:'Active orders', delayed:'Delayed orders', routes:'Route planning',
+        reassign:'Rider reassign', fleet:'Fleet utilisation', ontime:'On-time rate',
+        delivery:'Avg delivery', cost:'Cost / order', reconcile:'Cost reconciliation'
+      };
+      const s = scores[id];
+      const msg = s >= 4.5 ? 'dominant in your layout'
+        : s >= 3.5 ? 'foregrounded'
+        : s >= 2.5 ? 'gaining prominence'
+        : 'registered';
+      document.getElementById('stxt').textContent =
+        `"${labels[id]}" ${msg} Â· ${clicks} interaction${clicks === 1 ? '' : 's'} recorded`;
+
+      const h = document.getElementById('hint');
+      if (clicks >= 4)  h.textContent = 'Ignored widgets are contracting. Keep clicking to reveal more detail.';
+      if (clicks >= 10) h.textContent = 'Your usage pattern is now visible in the layout itself.';
+      if (clicks >= 20) h.textContent = 'This is what designing for the 100th use looks like.';
+    }
+
+    setInterval(decay, DECAY_MS);
+    render();
+  </script>
+</body>
+</html>
