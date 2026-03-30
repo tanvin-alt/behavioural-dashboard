@@ -197,7 +197,7 @@
         <p>This works best for single-user, repeated workflows in B2B tools: logistics ops, support desks, trading terminals. Shared devices need session-level identity or the layout learns a muddled average of everyone. It only tracks clicks too, not attention. Someone reading a panel for two minutes registers nothing. Any system like this should ask before it acts, not surprise you with a rearranged workspace. That is why the suggestion here waits for your confirmation. These are not blockers. They are the next design problems :)</p>
       </div>
     </div>
-    <div class="instruction-pill" style="margin-top:20px"><div class="pill-dot"></div>Click any widget repeatedly to see the dashboard adapt</div>
+    <div class="instruction-pill" style="margin-top:20px"><div class="pill-dot"></div>Click any feature repeatedly to see the dashboard adapt</div>
   </header>
 
   <div class="db-wrap">
@@ -255,7 +255,7 @@
       </div>
     </div>
 
-    <div class="hint" id="hint">All widgets start equal. Your clicks determine what the interface surfaces.</div>
+    <div class="hint" id="hint">All features start equal. Your clicks determine how the interface adapts.</div>
   </div>
 
   <div class="demo-note">
@@ -265,7 +265,7 @@
 
   <footer class="page-footer">
     <p>A demo for <em>Designing for the 100th Use</em>. Made by <a href="https://www.linkedin.com/in/tanvi-palkar-ab9b159a/" target="_blank" rel="noopener noreferrer">Tanvi Palkar</a>.</p>
-    <p style="margin-top:6px;font-size:11px">Click tiles · Repeat a sequence twice to trigger workflow detection · Switch to Abstract to see the same mechanic as pure shape</p>
+    <p style="margin-top:6px;font-size:11px">Click tiles · Repeat a sequence twice to trigger workflow detection · Switch to Concept to see the same mechanic as pure shape</p>
   </footer>
 
   <script>
@@ -375,7 +375,7 @@
     sugShown=true;
     document.getElementById('tt-seq').innerHTML=wf.map((id,i)=>`${i>0?'<span class="tt-arr">→</span>':''}<span class="tt-badge">${RL[id]}</span>`).join('');
     document.getElementById('wf-tooltip').classList.add('show');
-    document.getElementById('hint').textContent='Pattern detected. accept to pin these widgets to the top of your grid';
+    document.getElementById('hint').textContent='Pattern detected. accept to pin these features to the top of your grid';
   }
   function dismissTooltip(){dismissed=true;sugShown=false;pendingWF=null;document.getElementById('wf-tooltip').classList.remove('show');document.getElementById('hint').textContent='Dismissed. the interface keeps watching quietly.';}
   function acceptWorkflow(){
@@ -409,7 +409,7 @@
     document.getElementById('wf-tooltip').classList.remove('show');document.getElementById('wf-strip').classList.remove('show');
     if(!isAbstract)renderReal();else{bScores=Array(BN).fill(1);bLabelOp=Array(BN).fill(0);refreshBTargetR();startBAnim();}
     document.getElementById('stxt').textContent='Waiting for your first interaction';
-    document.getElementById('hint').textContent='All widgets start equal. Your clicks determine what the interface surfaces.';
+    document.getElementById('hint').textContent='All features start equal. Your clicks determine how the interface adapts.';
   }
 
   function setMode(mode){
@@ -426,7 +426,7 @@
       setTimeout(()=>{bSetupCanvas();bInitCircles();bDraw();},50);
     } else {
       document.getElementById('stxt').textContent='Waiting for your first interaction';
-      document.getElementById('hint').textContent='All widgets start equal. Your clicks determine what the interface surfaces.';
+      document.getElementById('hint').textContent='All features start equal. Your clicks determine how the interface adapts.';
       renderReal();
     }
   }
